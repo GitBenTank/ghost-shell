@@ -1,91 +1,101 @@
 // src/components/TerminalShell.jsx
-import React, { useState, useRef, useEffect } from 'react';
-import CommandParser from './CommandParser';
-import TypewriterText from './TypewriterText';
-import '../terminal.css';
-import useSoundEffect from '../hooks/useSoundEffect';
+import React, { useState, useRef, useEffect } from 'react'
+import CommandParser from './CommandParser'
+import TypewriterText from './TypewriterText'
+import '../terminal.css'
+import useSoundEffect from '../hooks/useSoundEffect'
 
 export default function TerminalShell() {
-  const [history, setHistory] = useState([]);
-  const [input, setInput] = useState('');
-  const [isFading, setIsFading] = useState(false);
-  const inputRef = useRef(null);
+  const [history, setHistory] = useState([])
+  const [input, setInput] = useState('')
+  const [isFading, setIsFading] = useState(false)
+  const inputRef = useRef(null)
 
   // === Sound Effects ===
-  const playKeystroke = useSoundEffect('/sounds/keystroke.wav');
-  const playEnter      = useSoundEffect('/sounds/enter.wav');
-  const playError      = useSoundEffect('/ounds/error_beep.wav');
-  const playGlitch     = useSoundEffect('/sounds/glitch_sweep.wav');
-  const playDisk       = useSoundEffect('/sounds/disk_seek.wav');
-  const playIntro      = useSoundEffect('/sounds/intro_modem.wav');
+  const playKeystroke = useSoundEffect('/sounds/keystroke.wav')
+  const playEnter      = useSoundEffect('/sounds/enter.wav')
+  const playError      = useSoundEffect('/ounds/error_beep.wav')
+  const playGlitch     = useSoundEffect('/sounds/glitch_sweep.wav')
+  const playDisk       = useSoundEffect('/sounds/disk_seek.wav')
+  const playIntro      = useSoundEffect('/sounds/intro_modem.wav')
 
+  // Always keep focus on the hidden input
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    inputRef.current?.focus()
+  }, [isFading])
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const trimmed = input.trim();
-      const { output, action } = CommandParser(trimmed);
+  function handleKeyDown(e) {
+    const key = e.key
 
-      // play the appropriate sound for this action
+    // ENTER: run the command
+    if (key === 'Enter') {
+      e.preventDefault()
+      const trimmed = input.trim()
+
+      // parse & play any special action
+      const { output, action } = CommandParser(trimmed)
+
       switch (action) {
         case 'CLEAR_HISTORY':
-          playGlitch();
-          setIsFading(true);
+          playGlitch()
+          setIsFading(true)
           setTimeout(() => {
-            setHistory([]);
-            setIsFading(false);
-          }, 300);
-          break;
+            setHistory([])
+            setIsFading(false)
+          }, 300)
+          break
         case 'PLAY_ERROR':
-          playError();
-          break;
+          playError()
+          break
         case 'PLAY_INTRO':
-          playIntro();
-          break;
+          playIntro()
+          break
         default:
-          if (trimmed) playDisk();
+          if (trimmed) playDisk()
       }
 
-      // record it in the history
-      setHistory((prev) => [...prev, `> ${trimmed}`, output]);
-      setInput('');
-      playEnter();
+      // push command + output
+      setHistory(h => [...h, `> ${trimmed}`, output])
+      setInput('')
+      playEnter()
     }
-    else if (e.key.length === 1 || e.key === 'Backspace') {
-      // just play a keystroke sound; let onChange handle the actual text
-      playKeystroke();
-    }
-  };
 
-  const handleChange = (e) => {
-    setInput(e.target.value);
-  };
+    // BACKSPACE: default editing + sound
+    else if (key === 'Backspace') {
+      playKeystroke()
+    }
+
+    // Any printable character: default editing + sound
+    else if (key.length === 1) {
+      playKeystroke()
+    }
+  }
 
   return (
-    <div className="terminal">
+    <div className="terminal-shell">
       {history.map((entry, i) =>
         typeof entry === 'string' ? (
-          <pre key={i} className={isFading ? 'fading' : ''}>
+          <pre key={i} className={isFading ? 'fade-out' : ''}>
             {entry}
           </pre>
         ) : (
           <TypewriterText key={i} text={entry.text} />
         )
       )}
-      <pre>
-        <span className="prompt">user@ghost ~% </span>
+
+      <pre className="prompt-line">
+        <span className="prompt-symbol">user@ghost ~% </span>
         <input
           ref={inputRef}
+          className="terminal-input"
           type="text"
           value={input}
-          onChange={handleChange}
+          onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="terminal-input"
+          autoComplete="off"
         />
+        <span className="blinking-cursor" />
       </pre>
     </div>
-  );
+  )
 }
