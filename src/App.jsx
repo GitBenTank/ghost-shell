@@ -1,13 +1,15 @@
-import React from 'react';
-import TerminalShell from './components/TerminalShell';
+// src/App.jsx
+import React, { useState } from 'react';
+import BootScreen from './components/BootScreen.jsx';
+import TerminalShell from './components/TerminalShell.jsx';
 import './terminal.css';
 
 function App() {
-  return (
-    <main className="app-container">
-      <TerminalShell />
-    </main>
-  );
+  const [booted, setBooted] = useState(false);
+
+  return booted
+    ? <TerminalShell />
+    : <BootScreen onBoot={() => setBooted(true)} />;
 }
 
 export default App;
