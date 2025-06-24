@@ -1,0 +1,138 @@
+/* === terminal.css === */
+/* Retro terminal design with blinking cursor, glowing text, and no white box */
+
+body {
+  background-color: #000;
+  color: #00ffcc;
+  font-family: 'Courier New', monospace;
+  padding: 1rem;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Shell container */
+.terminal-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Prompt line */
+.prompt-line {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+/* Prompt prefix (user@ghost ~%) */
+.prompt-symbol {
+  color: #00ffcc;
+  white-space: nowrap;
+}
+
+/* Input field */
+.terminal-input {
+  background: none;
+  border: none;
+  color: #00ffcc;
+  font-family: inherit;
+  font-size: 1rem;
+  flex: 1;
+  outline: none;
+  caret-color: #00ffcc;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Vintage block-style cursor */
+.blinking-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.2em;
+  background-color: #00ffcc;
+  margin-left: 4px;
+  animation: blink 1s step-start infinite;
+  vertical-align: bottom;
+}
+
+
+/* Blinking cursor animation */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Output lines */
+.command-output {
+  margin: 0.2rem 0;
+  white-space: pre-wrap;
+}
+
+/* Fade in/out */
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.3s ease-in;
+}
+
+/* Error text */
+.response.error {
+  color: #ff4c4c;
+  font-weight: bold;
+}
+
+/* Links */
+a {
+  color: #00eaff;
+  text-decoration: none;
+}
+a:hover {
+  text-shadow: 0 0 10px #bc4ed8;
+}
+
+/* Selection highlight */
+.terminal-input::selection {
+  background: #00ffcc33;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  body {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .terminal-input {
+    font-size: 1rem;
+  }
+}
+
+.terminal-input-hidden {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+.typewriter-output {
+  white-space: pre-wrap;
+  color: #00ffcc;
+  font-family: 'Courier New', monospace;
+}
+
