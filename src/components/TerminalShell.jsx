@@ -19,17 +19,17 @@ export default function TerminalShell() {
   const playDisk       = useSoundEffect('/sounds/disk_seek.wav');
   const playIntro      = useSoundEffect('/sounds/intro_modem.wav');
 
-  // auto-focus whenever this component loads
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  const handleInput = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       const trimmed = input.trim();
       const { output, action } = CommandParser(trimmed);
 
-      // play the right sound for each action
+      // play the appropriate sound for this action
       switch (action) {
         case 'CLEAR_HISTORY':
           playGlitch();
@@ -49,49 +49,43 @@ export default function TerminalShell() {
           if (trimmed) playDisk();
       }
 
+      // record it in the history
       setHistory((prev) => [...prev, `> ${trimmed}`, output]);
       setInput('');
       playEnter();
     }
-    else if (e.key.length === 1) {
-      setInput((prev) => prev + e.key);
-      playKeystroke();
-    }
-    else if (e.key === 'Backspace') {
-      setInput((prev) => prev.slice(0, -1));
+    else if (e.key.length === 1 || e.key === 'Backspace') {
+      // just play a keystroke sound; let onChange handle the actual text
       playKeystroke();
     }
   };
 
+  const handleChange = (e) => {
+    setInput(e.target.value);
+  };
+
   return (
-    // clicking anywhere refocuses the input (great for phones)
-    <div
-      className="terminal-shell"
-      onClick={() => inputRef.current?.focus()}
-      style={{ cursor: 'text' }}
-    >
+    <div className="terminal">
       {history.map((entry, i) =>
         typeof entry === 'string' ? (
-          <pre key={i} className={isFading ? 'fade-out' : ''}>
+          <pre key={i} className={isFading ? 'fading' : ''}>
             {entry}
           </pre>
         ) : (
           <TypewriterText key={i} text={entry.text} />
         )
       )}
-
-      <div className="prompt-line">
-        <span className="prompt-symbol">user@ghost ~% </span>
+      <pre>
+        <span className="prompt">user@ghost ~% </span>
         <input
           ref={inputRef}
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleInput}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
           className="terminal-input"
         />
-        <span className="blinking-cursor" />
-      </div>
+      </pre>
     </div>
   );
 }
